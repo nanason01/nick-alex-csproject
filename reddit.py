@@ -41,6 +41,15 @@ def reddit_get(url: str):
         print('Error sending request:', resp.reason)
         exit()
 
+def print_comments(comment_jsons):
+    for comment_json in comment_jsons:
+        print(comment_json['data']['body'])
+
+        if comment_json['data']['replies'] != '':
+            print('Has children:')
+            if comment_json['data']['replies']:
+                print_comments(comment_json['data']['replies']['data']['children'])
+
 resp_json = reddit_get("https://oauth.reddit.com/r/python/hot")
 
 interesting_things = [
@@ -56,11 +65,24 @@ interesting_things = [
     'selftext',
 ]
 
-for thing in interesting_things:
-    print(f'{thing}:', resp_json['data']['children'][0]['data'][thing])
-
-print(resp_json['data']['children'][0]['data'])
-
-
+print('these are the fields in a comment')
 resp_json = reddit_get('https://oauth.reddit.com/r/python/comments/pihblq')
-print('\n\n', resp_json[0]['data']['children'][0])
+print(resp_json[0]['data']['children'][0]['data'].keys())
+
+'''
+Some notes on the json response structure:
+
+everything is wrapped in a dict with 'kind' and 'data' fields,
+where 'kind' indicates the type of the following data
+
+anything that could be a list is then wrapped in the 'children' of 'data' of a listing-kind json
+
+comments have a 'replies' field which is either empty string or a listing object
+comments text is 'body'
+posts title is 'title' and content is in 'selftext'
+
+we can add a after and limit field to the header to specify the end time range and increase number of posts
+
+get for posts: https://oauth.reddit.com/r/<subreddit>/hot
+get for comments: https://oauth.reddit.com/r/<subreddit>/comments/<postid>
+'''
