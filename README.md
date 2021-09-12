@@ -6,7 +6,7 @@ first time:
 ```
 python3 -m venv env
 source env/bin/activate
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 after that:
