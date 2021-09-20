@@ -1,5 +1,5 @@
 
-WALLSTREETBETS_DIR = 'wallstreetbets_posts'
+REDDIT_POSTS_DIR = 'reddit_posts'
 
 REDDIT_POST_FIELDS = [
     'score',
@@ -12,3 +12,13 @@ REDDIT_POST_FIELDS = [
 ]
 
 PUSHSHIFT_LAST_TIMESTAMP_FILE = 'pushshift_last_timestamp_dont_delete.txt'
+
+SQLITE_DB_FILENAME = 'sql/sqlite_db'
+
+SUBREDDIT_TO_INT = {
+    'wallstreetbets': 1,
+}
+INT_TO_SUBREDDIT = {
+    val: key
+    for key, val in SUBREDDIT_TO_INT.items()
+}

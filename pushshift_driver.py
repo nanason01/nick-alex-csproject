@@ -3,11 +3,14 @@ import sys
 
 import formats.pushshift_post as pushshift_post
 import scrapers.pushshift as pushshift
+import sql.model as model
 from config import PUSHSHIFT_LAST_TIMESTAMP_FILE
 
 poster = pushshift_post.Pushshift_Post()
 
 print('WARNING: USE CTRL+C TO END PROGRAM, NOT CTRL+Z OR PROGRESS IS A LOT HARDER TO RECOVER', file=sys.stderr)
+
+db_conn = model.get_db()
 
 try:
     with open(PUSHSHIFT_LAST_TIMESTAMP_FILE, 'r') as fin:
@@ -17,7 +20,7 @@ except FileNotFoundError:
     resp_json = pushshift.pushshift_subreddit_get(limit=1000, subreddit='wallstreetbets')
     
     for json_in in resp_json['data']:
-        poster.digest_json(json_in)
+        poster.digest_json(json_in, db_conn)
 
     last_lowest = min([entry['created_utc'] for entry in resp_json['data']])
 
@@ -29,13 +32,15 @@ try:
         resp_json = pushshift.pushshift_subreddit_get(before=last_lowest, limit=1000, subreddit='wallstreetbets')
 
         for json_in in resp_json['data']:
-            poster.digest_json(json_in)
+            poster.digest_json(json_in, db_conn)
 
         last_lowest = min([entry['created_utc'] for entry in resp_json['data']])
 
         count += len(resp_json['data'])
         print('processed', count)
 except KeyboardInterrupt:
+    model.close_db()
+
     with open(PUSHSHIFT_LAST_TIMESTAMP_FILE, 'w') as fout:
         fout.write(str(last_lowest))
         fout.write('\n')
