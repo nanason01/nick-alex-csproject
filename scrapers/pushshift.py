@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import requests
+import time
 import sys
 
 PUSHSHIFT_URL = 'https://api.pushshift.io'
@@ -11,8 +12,14 @@ HEADERS = {
 }
 
 def pushshift_subreddit_get(**kwargs):
-    resp = requests.get(PUSHSHIFT_SUBREDDIT_URL, headers=HEADERS, params=kwargs)
-    return resp.json()
+    while True:
+        resp = requests.get(PUSHSHIFT_SUBREDDIT_URL, headers=HEADERS, params=kwargs)
+        if resp.status_code == 429:
+            print('waiting a sec')
+            time.sleep(5)
+            continue
+
+        return resp.json()
 
 def pushshift_comment_get(**kwargs):
     resp = requests.get(PUSHSHIFT_COMMENT_URL, headers=HEADERS, params=kwargs)
@@ -21,6 +28,20 @@ def pushshift_comment_get(**kwargs):
 #resp_json = pushshift_subreddit_get()
 #print(resp_json)
 
+'''
+resp = pushshift_subreddit_get(subreddit='wallstreetbets')
+utcs = [entry['created_utc'] for entry in resp['data']]
+lowest, highest = min(utcs), max(utcs)
+print('range:', lowest, 'to', highest)
 
-resp = requests.get('https://www.cnn.com/')
-print(resp.json())
+
+resp = pushshift_subreddit_get(before=lowest, subreddit='wallstreetbets')
+utcs = [entry['created_utc'] for entry in resp['data']]
+lowest1, highest1 = min(utcs), max(utcs)
+print('range:', lowest1, 'to', highest1)
+
+resp = pushshift_subreddit_get(before=highest, subreddit='wallstreetbets')
+utcs = [entry['created_utc'] for entry in resp['data']]
+lowest2, highest2 = min(utcs), max(utcs)
+print('range:', lowest2, 'to', highest2)
+'''
