@@ -1,12 +1,16 @@
-import json
 from datetime import datetime, timedelta
 import requests
 import sys
 
 headers = {
-        'user-agent': 'nick-alex-csproject/nicks-macbook'
+    'user-agent': 'nick-alex-csproject/nicks-macbook'
 }
 header_expires_at = datetime.now()
+
+params = {
+    'limit': 100,
+    'count': 0,
+}
 
 def update_header_auth():
     global header_expires_at
@@ -34,7 +38,11 @@ def update_header_auth():
 def reddit_get(url: str):
     update_header_auth()
 
-    resp = requests.get(url, headers=headers)
+    resp = requests.get(url, headers=headers, params=params)
+
+    params['after'] = resp.json()['data']['after']
+    params['count'] += resp.json()['data']['dist']
+
     if resp.status_code == 200:
         return resp.json()
     else:
@@ -49,25 +57,6 @@ def print_comments(comment_jsons):
             print('Has children:')
             if comment_json['data']['replies']:
                 print_comments(comment_json['data']['replies']['data']['children'])
-
-resp_json = reddit_get("https://oauth.reddit.com/r/python/hot")
-
-interesting_things = [
-    'title',
-    'ups',
-    'downs',
-    'score',
-    'upvote_ratio',
-    'view_count',
-    'num_comments',
-    'media',
-    'num_reports',
-    'selftext',
-]
-
-print('these are the fields in a comment')
-resp_json = reddit_get('https://oauth.reddit.com/r/python/comments/pihblq')
-print(resp_json[0]['data']['children'][0]['data'].keys())
 
 '''
 Some notes on the json response structure:
