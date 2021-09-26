@@ -21,11 +21,12 @@ def utc_to_dt(timestampValue):
 class Pushshift_Post:
     # store a json as a file with proper placement and format
     def digest_json(self, json_in, db_conn):
+        
         db_conn.execute(
-            "INSERT INTO posts (postid, created_utc, score, upvote_ratio, total_awards_received, author, subreddit, title, selftext) "
+            "INSERT OR IGNORE INTO posts (postid, created_utc, score, upvote_ratio, total_awards_received, author, subreddit, title, selftext) "
             "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (json_in['id'], json_in['created_utc'], json_in['score'], json_in['upvote_ratio'], json_in['total_awards_received'],
-             json_in['author'], json_in['subreddit'], json_in.get('title', 'empty'), json_in.get('selftext', 'empty'))
+            (json_in['id'], json_in['created_utc'], json_in.get('score', 0), json_in.get('upvote_ratio', 0), json_in.get('total_awards_received', 0),
+            json_in.get('author', '__no_author'), json_in['subreddit'], json_in.get('title', 'empty'), json_in.get('selftext', 'empty'))
         )
 
     # return a dict of important fields from a previously stored file

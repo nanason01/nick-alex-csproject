@@ -13,20 +13,18 @@ def dict_factory(cursor, row):
 
 
 def get_db():
-    global db_conn
-    if db_conn is None:
-        db_filename = SQLITE_DB_FILENAME
-        db_conn = sqlite3.connect(str(db_filename))
-        db_conn.row_factory = dict_factory
+    db_filename = SQLITE_DB_FILENAME
+    db_conn = sqlite3.connect(str(db_filename))
+    db_conn.row_factory = dict_factory
 
-        # Foreign keys have to be enabled per-connection.  This is an sqlite3
-        # backwards compatibility thing.
-        db_conn.execute("PRAGMA foreign_keys = ON")
+    # Foreign keys have to be enabled per-connection.  This is an sqlite3
+    # backwards compatibility thing.
+    db_conn.execute("PRAGMA foreign_keys = ON")
 
     return db_conn
 
 
-def close_db():
+def close_db(db_conn):
     """Close the database at the end of a request.
 
     Flask docs:

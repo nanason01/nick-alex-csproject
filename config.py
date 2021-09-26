@@ -11,7 +11,7 @@ REDDIT_POST_FIELDS = [
     'selftext',
 ]
 
-PUSHSHIFT_LAST_TIMESTAMP_FILE = 'pushshift_last_timestamp_dont_delete.txt'
+PUSHSHIFT_LAST_TIMESTAMP_FILE = 'pushshift_last_timestamp_dont_delete'
 
 SQLITE_DB_FILENAME = 'sql/sqlite_db'
 

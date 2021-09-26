@@ -13,3 +13,9 @@ after that:
 ```
 source env/bin/activate
 ```
+
+To create a new db:
+
+```
+sqlite3 sql/sqlite_db < sql/schema.sql
+```
