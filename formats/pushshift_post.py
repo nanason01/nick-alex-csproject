@@ -1,11 +1,12 @@
 from datetime import datetime
 import pathlib
+import sqlite3
 import sys
 
-from config import REDDIT_POST_FIELDS, WALLSTREETBETS_DIR
+from requests.api import post
 
-wsb_dirpath = pathlib.Path(WALLSTREETBETS_DIR)
-wsb_dirpath.mkdir(exist_ok=True)
+from config import REDDIT_POST_FIELDS, REDDIT_POSTS_DIR, SUBREDDIT_TO_INT
+
 
 def utc_to_dt(timestampValue):
    # get the UTC time from the timestamp integer value.
@@ -19,29 +20,19 @@ def utc_to_dt(timestampValue):
 
 class Pushshift_Post:
     # store a json as a file with proper placement and format
-    def digest_json(self, json_in):
-        created_utc = json_in['created_utc']
-        created_datetime = utc_to_dt(created_utc)
-        day_dir_str = str(created_datetime.date())
+    def digest_json(self, json_in, db_conn):
         
-        day_dir = wsb_dirpath / day_dir_str
-        day_dir.mkdir(exist_ok=True)
-
-        post_id = json_in['id']
-        out_file = day_dir / post_id
-
-        with open(str(out_file), 'w') as fout:
-            fout.write(str(created_datetime))
-            fout.write('\n')
-
-            fout.writelines([
-                str(json_in.get(field, 'no field found')) + '\n'
-                for field in REDDIT_POST_FIELDS
-            ])
+        db_conn.execute(
+            "INSERT OR IGNORE INTO posts (postid, created_utc, score, upvote_ratio, total_awards_received, author, subreddit, title, selftext) "
+            "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (json_in['id'], json_in['created_utc'], json_in.get('score', 0), json_in.get('upvote_ratio', 0), json_in.get('total_awards_received', 0),
+            json_in.get('author', '__no_author'), json_in['subreddit'], json_in.get('title', 'empty'), json_in.get('selftext', 'empty'))
+        )
 
     # return a dict of important fields from a previously stored file
     # equivalent to the stripped 'data' field of the json_in
     def digest_file(self, filename):
+        assert False
         if not pathlib.Path(filename).exists():
             print('Error:', filename, 'does not exist', file=sys.stderr)
             return

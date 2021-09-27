@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import requests
 import time
-import sys
+import json
 
 PUSHSHIFT_URL = 'https://api.pushshift.io'
 PUSHSHIFT_SUBREDDIT_URL = 'https://api.pushshift.io/reddit/search/submission/'
@@ -19,7 +19,14 @@ def pushshift_subreddit_get(**kwargs):
             time.sleep(5)
             continue
 
-        return resp.json()
+        try:
+            return resp.json()
+        except json.JSONDecodeError:
+            print('json decode error in getting')
+            continue
+        except:
+            print('unexpected error in getting')
+            continue
 
 def pushshift_comment_get(**kwargs):
     resp = requests.get(PUSHSHIFT_COMMENT_URL, headers=HEADERS, params=kwargs)

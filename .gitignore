@@ -1,3 +1,4 @@
 *pycache*
 env/*
 wallstreetbets_posts/*
+sql/sqlite_db
