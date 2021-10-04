@@ -2,3 +2,4 @@
 env/*
 wallstreetbets_posts/*
 sql/sqlite_db
+pushshift_last_timestamp*

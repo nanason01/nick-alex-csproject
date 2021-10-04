@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.express as px
-from datetime import datetime
+from datetime import date, datetime
 
 import sql.model as model
 
@@ -32,4 +32,19 @@ def find_where():
 
     print(df_with_gme.shape)
 
-find_where()
+def find_where(words_in, subreddit: str = 'wallstreetbets'):
+    words_in = [word.lower() for word in words_in]
+
+    find_str = f"SELECT * FROM posts WHERE subreddit = {subreddit} AND ("
+    for word in words_in:
+        find_str += f"lower(title) LIKE '%{word}%' OR lower(selftext) LIKE '%{word}%' OR "
+    find_str = find_str[:-4]
+    print(find_str)
+    find_str += ')'
+
+    out_df = get_df(find_str)
+    out_df.created_utc = out_df.created_utc.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%Y-%m-%d'))
+
+    return out_df
+
+find_where(['gme', 'gamestop'])

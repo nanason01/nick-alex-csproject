@@ -22,14 +22,3 @@ def get_db():
     db_conn.execute("PRAGMA foreign_keys = ON")
 
     return db_conn
-
-
-def close_db(db_conn):
-    """Close the database at the end of a request.
-
-    Flask docs:
-    https://flask.palletsprojects.com/en/1.0.x/appcontext/#storing-data
-    """
-    if db_conn is not None:
-        db_conn.commit()
-        db_conn.close()
