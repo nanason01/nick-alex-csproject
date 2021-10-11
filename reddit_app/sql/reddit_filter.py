@@ -27,6 +27,10 @@ def find_where(words_in, subreddit: str = 'wallstreetbets', include_title: bool=
     if not include_title and not include_selftext:
         print('warning: not including any fields to search for')
         return pd.DataFrame
+
+    if words_in == []:
+        print('warning: no words to search for')
+        return pd.DataFrame
     
     find_str = find_str[:-4]
     find_str += ')'

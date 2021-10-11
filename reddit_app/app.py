@@ -11,8 +11,6 @@ import pandas as pd
 
 app = dash.Dash(__name__)
 
-LOWEST_REDDIT_TIMESTAMP = '9/25/16'
-HIGHEST_REDDIT_TIMESTAMP = '9/25/21'
 
 def get_reddit_ts(filter_words):
     df = reddit_filter.find_where(filter_words)
@@ -21,10 +19,13 @@ def get_reddit_ts(filter_words):
 
     df = df['timestamp'].value_counts().rename_axis('timestamp').reset_index(name='num_posts')
 
+    print(filter_words)
+    print(df)
+
     return df
 
 def get_stock_ts(symbol: str):
-    return stock_data.get_stock_data(symbol, LOWEST_REDDIT_TIMESTAMP, HIGHEST_REDDIT_TIMESTAMP)
+    return stock_data.get_stock_data(symbol)
 
 def get_main_fig(symbol: str, reddit_terms):
     reddit_df = get_reddit_ts(reddit_terms)
@@ -69,5 +70,9 @@ app.layout = html.Div(children=[
 def render_fig(symbol, reddit_terms):
     if symbol is None or symbol.upper() not in ['GME', 'TSLA', 'AMC']:
         return dcc.Graph()
+
+    print(reddit_terms)
+    if reddit_terms is None:
+        reddit_terms = ''
 
     return dcc.Graph(figure=get_main_fig(symbol, reddit_terms.split()))

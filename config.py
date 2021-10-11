@@ -22,3 +22,6 @@ INT_TO_SUBREDDIT = {
     val: key
     for key, val in SUBREDDIT_TO_INT.items()
 }
+
+LOWEST_REDDIT_TIMESTAMP = '9/25/16'
+HIGHEST_REDDIT_TIMESTAMP = '9/25/21'
