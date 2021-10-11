@@ -20,7 +20,6 @@ Flask-Compress==1.10.1
 html5validator==0.4.0
 idna==3.2
 iniconfig==1.1.1
-insta485==0.1.0
 isort==5.9.3
 itsdangerous==2.0.1
 Jinja2==3.0.1

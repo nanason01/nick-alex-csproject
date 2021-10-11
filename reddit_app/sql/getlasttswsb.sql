@@ -1,1 +1,1 @@
-SELECT MIN(created_utc) FROM posts WHERE subreddit = "wallstreetbets";
+SELECT MAX(created_utc) FROM posts WHERE subreddit = "wallstreetbets";
