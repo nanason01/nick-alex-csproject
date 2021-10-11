@@ -10,7 +10,6 @@ app = dash.Dash(__name__)
 df = get_stock_data('GME', '12/0``  11/20','05/01/21')
 fig = px.line(df, x= "t", y = "h")
 
-
 app.layout = html.Div(children=[
     html.H1(children='Hello Dash'),
 
@@ -21,8 +20,5 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='example-graph',
         figure=fig
-    )
+    ),
 ])
-
-if __name__ == '__main__':
-    app.run_server(debug=True)

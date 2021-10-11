@@ -1,6 +1,5 @@
 import pandas as pd
-import plotly.express as px
-from datetime import date, datetime
+from datetime import datetime
 
 import reddit_app.sql.model as model
 
@@ -33,9 +32,6 @@ def find_where(words_in, subreddit: str = 'wallstreetbets', include_title: bool=
     find_str += ')'
 
     out_df = get_df(find_str)
-    out_df.created_utc = out_df.created_utc.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%Y-%m-%d'))
+    out_df.created_utc = out_df.created_utc.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%d/%m/%Y'))
 
     return out_df
-
-print(find_where(['gme', 'gamestop']))
-print(get_df('SELECT * FROM posts WHERE subreddit = "wallstreetbets"'))
