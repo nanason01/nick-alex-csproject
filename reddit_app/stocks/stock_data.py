@@ -54,10 +54,8 @@ def download_data(aps, symbols, start_date, end_date):
     return df
 
 
-mu = Lock()
 def get_stock_data(symbol: str, startDate, endDate) -> pd.DataFrame:
     '''Return df of daily changes in symbol'''
-    mu.acquire()
     df = download_data(aps        = aps, 
               symbols    = [symbol], 
               start_date = datetime.strptime(startDate, '%m/%d/%y'), 
@@ -75,7 +73,6 @@ def get_stock_data(symbol: str, startDate, endDate) -> pd.DataFrame:
 
     df.timestamp = df.timestamp.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%y'))
     
-    mu.release()
     return df
     
 # Call method.
