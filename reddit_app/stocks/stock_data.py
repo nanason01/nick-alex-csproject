@@ -7,6 +7,8 @@ import time
 
 import alpaca_trade_api as tradeapi
 
+from threading import Lock
+
 def break_period_in_dates_list(start_date, end_date, days_per_step):
     '''Break period between start_date and end_date in steps of days_per_step days.'''
     step_start_date = start_date
@@ -52,8 +54,10 @@ def download_data(aps, symbols, start_date, end_date):
     return df
 
 
+mu = Lock()
 def get_stock_data(symbol: str, startDate, endDate) -> pd.DataFrame:
     '''Return df of daily changes in symbol'''
+    mu.acquire()
     df = download_data(aps        = aps, 
               symbols    = [symbol], 
               start_date = datetime.strptime(startDate, '%m/%d/%y'), 
@@ -69,8 +73,9 @@ def get_stock_data(symbol: str, startDate, endDate) -> pd.DataFrame:
         'symbol': 'symbol',
     })
 
-    df.timestamp = df.timestamp.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%Y'))
+    df.timestamp = df.timestamp.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%y'))
     
+    mu.release()
     return df
     
 # Call method.

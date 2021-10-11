@@ -13,7 +13,7 @@ REDDIT_POST_FIELDS = [
 
 PUSHSHIFT_LAST_TIMESTAMP_FILE = 'pushshift_last_timestamp_dont_delete'
 
-SQLITE_DB_FILENAME = 'sql/sqlite_db'
+SQLITE_DB_FILENAME = 'reddit_app/sql/sqlite_db'
 
 SUBREDDIT_TO_INT = {
     'wallstreetbets': 1,

@@ -4,3 +4,4 @@ wallstreetbets_posts/*
 *sqlite_db
 pushshift_last_timestamp*
 *egg-info*
+*DS_Store*
