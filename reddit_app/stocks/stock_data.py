@@ -45,7 +45,7 @@ def download_data(aps, symbols, start_date, end_date):
     df = pd.DataFrame()
     
     for timestep in tqdm(timesteps):
-        barset = aps.get_barset(symbols, '5Min', limit=1000, start=timestep[0], end=timestep[1])
+        barset = aps.get_barset(symbols, 'day', limit=1000, start=timestep[0], end=timestep[1])
         df = df.append(get_df_from_barset(barset))
         time.sleep(0.1)
         
@@ -54,13 +54,24 @@ def download_data(aps, symbols, start_date, end_date):
 
 def get_stock_data(symbol: str, startDate, endDate) -> pd.DataFrame:
     '''Return df of daily changes in symbol'''
-    return download_data(aps        = aps, 
+    df = download_data(aps        = aps, 
               symbols    = [symbol], 
-              start_date = datetime.strptime(startDate, '%d/%m/%y'), 
-              end_date   = datetime.strptime(endDate, '%d/%m/%y'))
-              #end_date   = datetime.strptime('01/02/21', '%d/%m/%y'))
+              start_date = datetime.strptime(startDate, '%m/%d/%y'), 
+              end_date   = datetime.strptime(endDate, '%m/%d/%y'))
+    
+    df = df.rename(columns={
+        't': 'timestamp',
+        'o': 'open',
+        'h': 'high',
+        'l': 'low',
+        'c': 'close',
+        'v': 'volume',
+        'symbol': 'symbol',
+    })
 
-        
+    df.timestamp = df.timestamp.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%Y'))
+    
+    return df
     
 # Call method.
 aps = tradeapi.REST(key_id = 'AKVUIT2XXKCQ1W2W6TF6', 
