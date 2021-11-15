@@ -39,3 +39,6 @@ def find_where(words_in, subreddit: str = 'wallstreetbets', include_title: bool=
     out_df.created_utc = out_df.created_utc.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%y'))
 
     return out_df
+
+def add_ratio(df_in, emotion: str):
+    df_in[emotion] = 1 # TODO base this on column(s) with words

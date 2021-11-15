@@ -62,6 +62,11 @@ app.layout = html.Div(children=[
     html.Div(id='graph-placeholder')
 ])
 
+# TODO:
+# add multi input for emotion
+# add figure that overlays multiple ratios of that
+# add callback to pipe those together
+
 @app.callback(
     Output('graph-placeholder', 'children'),
     Input('symbol-in', 'value'),
@@ -76,3 +81,33 @@ def render_fig(symbol, reddit_terms):
         reddit_terms = ''
 
     return dcc.Graph(figure=get_main_fig(symbol, reddit_terms.split()))
+
+
+'''
+cat dog
+dog mouse
+cat mouse
+dog
+mouse cat
+'''
+
+'''
+cat: 0 2 4
+dog: 0 1 3
+mouse: 1 2 4
+'''
+
+'''
+k cat dog mouse
+
+0 2 4
+0 1 3
+
+-> 0
+
+0
+1 2 4
+-> ''
+
+
+'''

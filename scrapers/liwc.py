@@ -63,16 +63,15 @@ def insert_regexes(db_conn, emotions_dict):
             emotion_num_list = [int(i) for i in line.split('\t')[1:]]
 
             task = make_insert_row_regex(emotions_dict, regex, emotion_num_list)
-            print(task)
             db_conn.execute(task)
             
-db_conn = sqlite3.connect("/mnt/c/Users/nicka/Desktop/nick-alex-csproject/reddit_app/sql/sqlite_db")
+db_conn = sqlite3.connect("/Users/nick/Desktop/social_media_project/reddit_app/sql/sqlite_db")
 
 emotions_dict = get_emotions()
 
 # create_liwc_table_cmd(emotions_dict)
 
-# insert_regexes(db_conn, emotions_dict)
+insert_regexes(db_conn, emotions_dict)
 
 db_conn.commit()
 db_conn.close()
