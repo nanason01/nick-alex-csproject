@@ -1,5 +1,6 @@
 import reddit_app.stocks.stock_data as stock_data
 import reddit_app.sql.reddit_filter as reddit_filter
+from liwc.liwc_cols_with_nums import LIWC_NUM_TO_EMOTION
 
 from dash import html, dcc
 import dash
@@ -59,13 +60,27 @@ app.layout = html.Div(children=[
     dcc.Input(id='symbol-in', type='text', placeholder='symbol', value='gme'),
     dcc.Input(id='reddit-search-in', type='text', placeholder='search terms', value='gme gamestop'),
 
+    html.Div(id='emotion-out'),
+    dcc.Dropdown(
+        id='emotion-in',
+        options=[{'label': emotion, 'value': emotion} for emotion in LIWC_NUM_TO_EMOTION.values()],
+        multi=True
+    ),
+
     html.Div(id='graph-placeholder')
 ])
 
 # TODO:
-# add multi input for emotion
 # add figure that overlays multiple ratios of that
 # add callback to pipe those together
+
+@app.callback(
+    Output('emotion-out', 'children'),
+    Input('emotion-in', 'value')
+)
+def temp_output_emotions(selection):
+    print(selection)
+    return selection
 
 @app.callback(
     Output('graph-placeholder', 'children'),
@@ -81,33 +96,3 @@ def render_fig(symbol, reddit_terms):
         reddit_terms = ''
 
     return dcc.Graph(figure=get_main_fig(symbol, reddit_terms.split()))
-
-
-'''
-cat dog
-dog mouse
-cat mouse
-dog
-mouse cat
-'''
-
-'''
-cat: 0 2 4
-dog: 0 1 3
-mouse: 1 2 4
-'''
-
-'''
-k cat dog mouse
-
-0 2 4
-0 1 3
-
--> 0
-
-0
-1 2 4
--> ''
-
-
-'''
