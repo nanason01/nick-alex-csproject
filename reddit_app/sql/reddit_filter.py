@@ -34,8 +34,6 @@ def find_where(words_in, subreddit: str = 'wallstreetbets', include_title: bool=
     
     find_str = find_str[:-4]
     find_str += ')'
-
     out_df = get_df(find_str)
     out_df.created_utc = out_df.created_utc.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%y'))
-
     return out_df

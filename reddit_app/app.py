@@ -1,15 +1,15 @@
 import reddit_app.stocks.stock_data as stock_data
 import reddit_app.sql.reddit_filter as reddit_filter
 
-from dash import html, dcc
-import dash
-from dash.dependencies import Input, Output
-import plotly.express as px
+#from dash import html, dcc
+#import dash
+#from dash.dependencies import Input, Output
+#import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import pandas as pd
+#import pandas as pd
 
-app = dash.Dash(__name__)
+#app = dash.Dash(__name__)
 
 
 def get_reddit_ts(filter_words):
@@ -29,9 +29,10 @@ def get_stock_ts(symbol: str):
 
 def get_main_fig(symbol: str, reddit_terms):
     reddit_df = get_reddit_ts(reddit_terms)
-    
+    return reddit_df
+    print("test1")
     stock_df = get_stock_ts(symbol.upper())
-
+    print("test2")
     df = stock_df.merge(reddit_df, how='outer', on='timestamp')
     df['num_posts'] = df['num_posts'].fillna(0)
 
@@ -49,30 +50,30 @@ def get_main_fig(symbol: str, reddit_terms):
     fig.update_xaxes(title_text="Date")
     fig.update_yaxes(title_text="Closing Price", secondary_y=False)
     fig.update_yaxes(title_text="Reddit Posts Mentioning", secondary_y=True)
-
+    
     return fig
 
 
-app.layout = html.Div(children=[
-    html.H1(children='Time Series Comparison Web App'),
+# app.layout = html.Div(children=[
+#     html.H1(children='Time Series Comparison Web App'),
 
-    dcc.Input(id='symbol-in', type='text', placeholder='symbol', value='gme'),
-    dcc.Input(id='reddit-search-in', type='text', placeholder='search terms', value='gme gamestop'),
+#     dcc.Input(id='symbol-in', type='text', placeholder='symbol', value='gme'),
+#     dcc.Input(id='reddit-search-in', type='text', placeholder='search terms', value='gme gamestop'),
 
-    html.Div(id='graph-placeholder')
-])
+#     html.Div(id='graph-placeholder')
+# ])
 
-@app.callback(
-    Output('graph-placeholder', 'children'),
-    Input('symbol-in', 'value'),
-    Input('reddit-search-in', 'value')
-)
-def render_fig(symbol, reddit_terms):
-    if symbol is None or symbol.upper() not in ['GME', 'TSLA', 'AMC']:
-        return dcc.Graph()
+# @app.callback(
+#     Output('graph-placeholder', 'children'),
+#     Input('symbol-in', 'value'),
+#     Input('reddit-search-in', 'value')
+# )
+# def render_fig(symbol, reddit_terms):
+#     if symbol is None or symbol.upper() not in ['GME', 'TSLA', 'AMC']:
+#         return dcc.Graph()
 
-    print(reddit_terms)
-    if reddit_terms is None:
-        reddit_terms = ''
+#     print(reddit_terms)
+#     if reddit_terms is None:
+#         reddit_terms = ''
 
-    return dcc.Graph(figure=get_main_fig(symbol, reddit_terms.split()))
+#     return dcc.Graph(figure=get_main_fig(symbol, reddit_terms.split()))
