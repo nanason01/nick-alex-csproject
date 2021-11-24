@@ -22,12 +22,13 @@ def get_stock_data(symbol: str) -> pd.DataFrame:
         'utc': 'timestamp',
     })
 
-    print('im here')
-    print(df)
-
     df.loc[:, 'timestamp'] = pd.to_datetime(df.loc[:, 'timestamp'])
-    df = df.set_index('timestamp')
-    return df.sort_index(inplace=True)
+    df = df.sort_values(by=['timestamp'])
+
+    print('stock_data:', df)
+    print('stock cols:', df.columns)
+
+    return df
 
 # takes stock data from db and makes it into timeseries.
 def stockChartToTimeSeries(chart: pd.DataFrame):

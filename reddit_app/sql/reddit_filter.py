@@ -1,3 +1,4 @@
+from os import O_TRUNC
 import pandas as pd
 from datetime import datetime
 
@@ -36,8 +37,19 @@ def find_where(words_in, subreddit: str = 'wallstreetbets', include_title: bool=
     find_str = find_str[:-4]
     find_str += ')'
     out_df = get_df(find_str)
-    out_df.created_utc = out_df.created_utc.apply(lambda d: datetime.utcfromtimestamp(d).strftime('%m/%d/%y'))
+
+    out_df['timestamp'] = pd.to_datetime(out_df['created_utc'])
+    out_df = out_df.sort_values(by=['timestamp'])
+
+    print('reddit df:', out_df)
+    print('reddit cols:', out_df.columns)
+    
     return out_df
+
+
+def bucket_by_day(df) -> pd.DataFrame:
+    df.timestamp = df.timestamp.apply(lambda d: d.strftime('%m/%d/%y'))
+    return df['timestamp'].value_counts().rename_axis('timestamp').reset_index(name='num_posts')
 
 def add_ratio(df_in, emotion: str):
     df_in[emotion] = df_in.apply(lambda row: score_string(row['selftext']), axis=1)
