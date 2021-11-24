@@ -6,3 +6,4 @@ pushshift_last_timestamp*
 *egg-info*
 *DS_Store*
 *db_filename_local.py
+*.csv

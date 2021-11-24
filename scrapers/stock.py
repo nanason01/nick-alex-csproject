@@ -1,6 +1,6 @@
 from typing import List
 import alpaca_trade_api as tradeapi
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import pandas as pd
 from tqdm import tqdm
 import time
@@ -42,24 +42,27 @@ def get_df_from_barset(barset):
 
     return pd.DataFrame(df_rows)
 
-
-def download_data(aps, symbols, start_date, end_date):
+#TODO: add stepsize
+# 2021-06-21T23:00:00-04:00
+def download_data(symbols, start_date, end_date):
     '''Download data from REST manager for list of symbols, from start_date at 00:00hs to end_date at 23:00hs,
     and save it to filename as a csv file.'''
+    aps = tradeapi.REST(key_id = 'AKVUIT2XXKCQ1W2W6TF6', 
+                    secret_key = 'chgVtbcftCmvDQiCPzuqIl686obrsSzZ1hDCeENG', 
+                    base_url = 'https://paper-api.alpaca.markets')
+
     timesteps = format_timestep_list(break_period_in_dates_list(start_date, end_date, 10))
     df = pd.DataFrame()
-    
     for timestep in tqdm(timesteps):
         barset = aps.get_barset(symbols, 'day', limit=1000, start=timestep[0], end=timestep[1])
         df = df.append(get_df_from_barset(barset))
         time.sleep(0.1)
-        
     return df
 
 
-def get_stock_data(symbol: str, startDate=LOWEST_REDDIT_TIMESTAMP, endDate=HIGHEST_REDDIT_TIMESTAMP) -> pd.DataFrame:
+def download_stock_data(symbol: str, startDate=LOWEST_REDDIT_TIMESTAMP, endDate=HIGHEST_REDDIT_TIMESTAMP) -> pd.DataFrame:
     '''Return df of daily changes in symbol'''
-    df = download_data(aps        = aps, 
+    df = download_data(
               symbols    = [symbol.upper()],
               start_date = datetime.strptime(LOWEST_REDDIT_TIMESTAMP, '%m/%d/%y'), 
               end_date   = datetime.strptime(HIGHEST_REDDIT_TIMESTAMP, '%m/%d/%y'))
@@ -92,7 +95,18 @@ aps = tradeapi.REST(key_id = 'AKVUIT2XXKCQ1W2W6TF6',
                     secret_key = 'chgVtbcftCmvDQiCPzuqIl686obrsSzZ1hDCeENG', 
                     base_url = 'https://paper-api.alpaca.markets')
 
-print('input a symbol to grab data for:')
-symbol = input()
+#print('input a symbol to grab data for:')
+#symbol = input()
+#symbol = 'GME'
+#df = download_data(
+#              symbols    = [symbol.upper()],
+#              start_date = datetime.strptime(LOWEST_REDDIT_TIMESTAMP, '%m/%d/%y'), 
+#             end_date   = datetime.strptime(HIGHEST_REDDIT_TIMESTAMP, '%m/%d/%y'))#
 
-get_stock_data(symbol)
+
+#df["t"] = pd.to_datetime(df["t"],)
+#print(datetime.utcfromtimestamp(1632110400).strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+#print(df)
+
+

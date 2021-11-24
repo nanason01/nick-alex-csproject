@@ -1,5 +1,6 @@
 import reddit_app.sql.model as model
-from liwc_cols_with_nums import LIWC_NUM_TO_EMOTION
+from reddit_app.liwc.liwc_cols_with_nums import LIWC_NUM_TO_EMOTION
+import re
 
 def make_insert_row_word(word, emotion_num_list) -> str:
     emotion_list = [LIWC_NUM_TO_EMOTION[num] for num in emotion_num_list]
@@ -54,3 +55,9 @@ def match_word(word: str):
 # a function to get whether a specific emotion is present in a word
 def word_has_emotion(word: str, emotion: str) -> bool:
     return match_word(word).get(emotion, 0) != 0
+
+# calculate the proportion of words in this string that have emotion
+def score_string(str_in: str, emotion: str) -> float:
+    return sum([
+        word_has_emotion(word, emotion) for word in re.sub(r'\W+', '', str_in).split()
+    ]) / float(len(re.sub(r'\W+', '', str_in).split()))
