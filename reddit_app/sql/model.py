@@ -1,5 +1,6 @@
 import sqlite3
 from config import SQLITE_DB_FILENAME
+from reddit_app.sql.db_filename_local import db_filename
 
 db_conn = None
 
@@ -13,7 +14,6 @@ def dict_factory(cursor, row):
 
 
 def get_db():
-    db_filename = '/Users/nick/Desktop/social_media_project/reddit_app/sql/sqlite_db'
     db_conn = sqlite3.connect(str(db_filename))
     db_conn.row_factory = dict_factory
 
