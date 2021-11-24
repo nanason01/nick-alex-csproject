@@ -56,14 +56,11 @@ def download_data(symbols, start_date, end_date):
     for timestep in tqdm(timesteps):
         barset = aps.get_barset(symbols, 'day', limit=1000, start=timestep[0], end=timestep[1])
         df = df.append(get_df_from_barset(barset))
-        time.sleep(0.1) 
-    fileName = str(symbols) + '.csv'
-    print(symbols, ": Writing Stock Data to File: ")
-    df.to_csv(fileName)
+        time.sleep(0.1)
     return df
 
 
-def get_stock_data(symbol: str, startDate=LOWEST_REDDIT_TIMESTAMP, endDate=HIGHEST_REDDIT_TIMESTAMP) -> pd.DataFrame:
+def download_stock_data(symbol: str, startDate=LOWEST_REDDIT_TIMESTAMP, endDate=HIGHEST_REDDIT_TIMESTAMP) -> pd.DataFrame:
     '''Return df of daily changes in symbol'''
     df = download_data(
               symbols    = [symbol.upper()],

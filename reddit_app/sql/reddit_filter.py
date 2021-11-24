@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 
 import reddit_app.sql.model as model
+from reddit_app.liwc.liwc import score_string
 
 
 def get_df(sql_statement: str):
@@ -39,4 +40,6 @@ def find_where(words_in, subreddit: str = 'wallstreetbets', include_title: bool=
     return out_df
 
 def add_ratio(df_in, emotion: str):
-    df_in[emotion] = 1 # TODO base this on column(s) with words
+    df_in[emotion] = df_in.apply(lambda row: score_string(row['selftext']), axis=1)
+
+    return df_in

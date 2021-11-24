@@ -1,7 +1,4 @@
-#import dash
+from reddit_app.app import app
 
-#import reddit_app
-#from reddit_app.app import app
-
-#if __name__ == '__main__':
-#    app.run_server(debug=True)
+if __name__ == '__main__':
+    app.run_server(port=8010, debug=True)

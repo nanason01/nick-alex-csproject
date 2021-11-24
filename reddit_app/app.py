@@ -1,99 +1,187 @@
-import reddit_app.stocks.stock_data as stock_data
-import reddit_app.sql.reddit_filter as reddit_filter
-from liwc.liwc_cols_with_nums import LIWC_NUM_TO_EMOTION
-
-#from dash import html, dcc
-#import dash
-#from dash.dependencies import Input, Output
-#import plotly.express as px
+from datetime import datetime
+from pandas.core.frame import DataFrame
+from dash import html, dcc
+import dash
+from dash.dependencies import Input, Output
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-#import pandas as pd
+import pandas as pd
+from reddit_app.sql.reddit_filter import find_where
+# from statsmodels.tsa.seasonal import seasonal_decompose
 
-#app = dash.Dash(__name__)
+from reddit_app.stocks.stock_data import get_stock_data
+
+"""
+Columns of reddit db currently:
+
+Unnamed: 0
+postid
+created_utc
+score
+upvote_ratio
+total_awards_received
+author
+subreddit
+title
+selftext 
+"""
+
+# TODO: Update this to specify formatting, it will run much faster.
+
+LOWEST_REDDIT_TIMESTAMP = '9/25/16'
+HIGHEST_REDDIT_TIMESTAMP = '9/25/21'
 
 
-def get_reddit_ts(filter_words):
-    df = reddit_filter.find_where(filter_words)
+# takes reddit data from db and makes it into timeseries.
+def redditChartToTimeSeries(chart: pd.DataFrame):
+    chart['timestamp'] = pd.to_datetime(chart['created_utc'])
+    chart = chart.set_index('timestamp')
+    chart.sort_index(inplace=True)
+    return chart
 
-    df = df.rename(columns={'created_utc': 'timestamp'})
 
-    df = df['timestamp'].value_counts().rename_axis('timestamp').reset_index(name='num_posts')
+app = dash.Dash(__name__)
 
-    print(filter_words)
-    print(df)
+merged_charts_tab = dcc.Tab(
+  label="Merged",
+  children=[
+    html.H1(id='H1', children='Time Series Decomposition Visualizer', style={'textAlign': 'center',
+                                                                            'marginTop': 40, 'marginBottom': 40}),
+    dcc.Graph(id="merged_graph"),
+    dcc.Input(
+      id="stock_in",
+      placeholder='Enter a stongk...',
+      type='text',
+      value='GME',
+      debounce=True),
+    dcc.Input(
+      id='reddit_terms',
+      type='text',
+      placeholder='search terms',
+      value='gme gamestop',
+      debounce=True),
+    dcc.Checklist(
+      id='flavor',
+      options=[
+        {'label': 'Price Observed', 'value': 'pObserved'},
+        {'label': 'Price Trend', 'value': 'pTrend'},
+        {'label': 'Price Seasonal', 'value': 'pSeasonal'},
+        {'label': 'Price Residual', 'value': 'pResidual'},
+        {'label': 'Mentions Observed', 'value': 'mObserved'},
+        {'label': 'Mentions Trend', 'value': 'mTrend'},
+        {'label': 'Mentions Seasonal', 'value': 'mSeasonal'},
+        {'label': 'Mentions Residual', 'value': 'mResidual'},
+  ],value=['pObserved','mObserved']
+)]),
+            
+unmerged_chart_depricated_tab = dcc.Tab(label = 'segundo', children= [
+  dcc.Dropdown(
+    id='mentions_graph_type',
+      options=[
+        {'label': 'Observed', 'value': 'observed'},
+        {'label': 'Trend', 'value': 'trend'},
+        {'label': 'Seasonal', 'value': 'seasonal'},
+        {'label': 'Residual', 'value': 'resid'}
+      ],
+      value='observed'
+    ), dcc.Dropdown(
+      id='price_graph_type',
+      options=[
+        {'label': 'Observed', 'value': 'observed'},
+        {'label': 'Trend', 'value': 'trend'},
+        {'label': 'Seasonal', 'value': 'seasonal'},
+        {'label': 'Residual', 'value': 'resid'}
+      ],
+      value='observed'
+    ),
+    html.H1("Individual: ", style={
+            "margintop": 100, 'marginBottom': 40}),
+    dcc.Dropdown(
+      id='graph_type',
+      options=[
+        {'label': 'Observed', 'value': 'observed'},
+        {'label': 'Trend', 'value': 'trend'},
+        {'label': 'Seasonal', 'value': 'seasonal'},
+        {'label': 'Residual', 'value': 'resid'}
+      ],
+      value='observed'
+    ),
+    html.Br(),
+    html.Div(id='type_output'),
+    dcc.Graph(id='stock_graph'),
+    html.Div(id='reddit', children=[
+      dcc.Input(
+        id="stock_in_2",
+        placeholder='Enter a stock to search reddit',
+        type='text',
+        value='GME',
+        debounce=True),
+      dcc.Input(
+        id='reddit-search-in',
+        type='text',
+        placeholder='search terms',
+        value='gme gamestop',
+        debounce=True),
+      dcc.Graph(id='stock_graph_2')
+    ])
+  ]
+)
 
-    return df
-
-def get_stock_ts(symbol: str):
-    return stock_data.get_stock_data(symbol)
-
-def get_main_fig(symbol: str, reddit_terms):
-    reddit_df = get_reddit_ts(reddit_terms)
-    return reddit_df
-    print("test1")
-    stock_df = get_stock_ts(symbol.upper())
-    print("test2")
-    df = stock_df.merge(reddit_df, how='outer', on='timestamp')
-    df['num_posts'] = df['num_posts'].fillna(0)
-
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(
-        go.Scatter(x=df['timestamp'], y=df['close'], name="closing price"),
-        secondary_y=False,
+app.layout = html.Div(id='parent', children=[
+    dcc.Tabs(
+      [
+        merged_charts_tab,
+        unmerged_chart_depricated_tab,
+      ]
     )
-    fig.add_trace(
-        go.Scatter(x=df['timestamp'], y=df['num_posts'], name="daily reddit mentions"),
-        secondary_y=True,
-    )
+  ]
+)
 
-    fig.update_layout(title_text="Time series of reddit mentions and stock performance")
-    fig.update_xaxes(title_text="Date")
-    fig.update_yaxes(title_text="Closing Price", secondary_y=False)
-    fig.update_yaxes(title_text="Reddit Posts Mentioning", secondary_y=True)
+
+@app.callback(
+  Output(component_id='merged_graph', component_property='figure'),
+  Input(component_id='flavor', component_property='value'),
+  Input(component_id='stock_in', component_property='value'),
+  Input('reddit_terms', 'value')
+)
+def decomposeGraph(graph_selection, symbol, terms):
+    print('here')
+    mentions_df = redditChartToTimeSeries(find_where(terms.split()))
     
+    print('here again 1')
+    stock_df = get_stock_data(symbol)
+    
+    print('here again 2')
+    
+    ''' TODO temp because I can't install seasonal_decompose
+    graphed_dfs = []
+    price_dfs = seasonal_decompose(stock_df, model='additive', period=30)
+    mentions_dfs = seasonal_decompose(mentions_df, model='additive',period=30)
+    
+    # Price Switches
+    if 'pObserved' in graph_selection:
+      graphed_dfs.append(price_dfs.observed)
+    if 'pTrend' in graph_selection:
+      graphed_dfs.append(price_dfs.trend)
+    if 'pSeasonal' in graph_selection:
+      graphed_dfs.append(price_dfs.seasonal)
+    if 'pResidual' in graph_selection:
+      graphed_dfs.append(price_dfs.residual)
+    # Mentions Switches
+    if 'mObserved' in graph_selection:
+      graphed_dfs.append(mentions_dfs.observed)
+    if 'mTrend' in graph_selection:
+      graphed_dfs.append(mentions_dfs.trend)
+    if 'mSeasonal' in graph_selection:
+      graphed_dfs.append(mentions_dfs.seasonal)
+    if 'mResidual' in graph_selection:
+      graphed_dfs.append(mentions_dfs.residual)
+    
+    out_df = graphed_dfs[0]
+    for df in graphed_dfs[1:]:
+      out_df = pd.merge_ordered(out_df, df)
+    '''
+    out_df = stock_df # TODO temp, nit
+
+    fig = go.Figure(data=out_df)
     return fig
 
-
-# app.layout = html.Div(children=[
-#     html.H1(children='Time Series Comparison Web App'),
-
-#     dcc.Input(id='symbol-in', type='text', placeholder='symbol', value='gme'),
-#     dcc.Input(id='reddit-search-in', type='text', placeholder='search terms', value='gme gamestop'),
-
-#     html.Div(id='emotion-out'),
-#     dcc.Dropdown(
-#         id='emotion-in',
-#         options=[{'label': emotion, 'value': emotion} for emotion in LIWC_NUM_TO_EMOTION.values()],
-#         multi=True
-#     ),
-
-#     html.Div(id='graph-placeholder')
-# ])
-
-# TODO:
-# add figure that overlays multiple ratios of that
-# add callback to pipe those together
-
-# @app.callback(
-#     Output('emotion-out', 'children'),
-#     Input('emotion-in', 'value')
-# )
-# def temp_output_emotions(selection):
-#     print(selection)
-#     return selection
-
-# @app.callback(
-#     Output('graph-placeholder', 'children'),
-#     Input('symbol-in', 'value'),
-#     Input('reddit-search-in', 'value')
-# )
-# def render_fig(symbol, reddit_terms):
-#     if symbol is None or symbol.upper() not in ['GME', 'TSLA', 'AMC']:
-#         return dcc.Graph()
-
-#     print(reddit_terms)
-#     if reddit_terms is None:
-#         reddit_terms = ''
-
-#     return dcc.Graph(figure=get_main_fig(symbol, reddit_terms.split()))
